@@ -1,0 +1,2 @@
+# PONG 接口
+GET http://{{host}}:{{port}}/ping

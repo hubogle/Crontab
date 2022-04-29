@@ -1,15 +1,24 @@
-package api
+package job
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/hubogle/Crontab/app/master/pkg/core"
+	"github.com/hubogle/Crontab/util/db/mysql"
+)
 
-func HandleJobCreate(ctx *gin.Context) {
+var _ Handler = (*handler)(nil)
 
+type Handler interface {
+	i()
+	Create() core.HandlerFunc
 }
 
-func HandleJobList(ctx *gin.Context) {
+func (h *handler) i() {}
 
+// handler 抽离每个接口需要的资源
+type handler struct {
+	repo mysql.Repo
 }
 
-func HandleJobDelete(ctx *gin.Context) {
-
+func New(db mysql.Repo) Handler {
+	return &handler{repo: db}
 }

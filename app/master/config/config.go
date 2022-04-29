@@ -18,7 +18,7 @@ type Config struct {
 		DBName          string        `mapstructure:"dbname"`
 		MaxOpenConn     int           `mapstructure:"maxOpenConn"`
 		MaxIdleConn     int           `mapstructure:"maxIdleConn"`
-		ConnMaxLifeTime time.Duration `mapstructure:"connMaxLifeTime"`
+		MaxLifeTimeConn time.Duration `mapstructure:"maxLifeTimeConn"`
 	} `mapstructure:"mysql"`
 }
 

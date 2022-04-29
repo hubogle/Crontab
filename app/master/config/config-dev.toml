@@ -8,6 +8,7 @@
   port = 3306
   user = ""
   pass = ""
-  connmaxlifetime = 60
-  maxidleconn = 60
-  maxopenconn = 10
+  dbname = ""
+  maxLifeTimeConn = 60
+  maxIdleConn = 60
+  maxOpenConn = 10

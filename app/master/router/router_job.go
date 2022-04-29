@@ -1,15 +1,13 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/hubogle/Crontab/app/master/api"
+	"github.com/hubogle/Crontab/app/master/api/job"
 )
 
-func InitUserRouter(router *gin.RouterGroup) {
-	jobGroup := router.Group("job")
+func setUserRouter(r *resource) {
+	jobGroup := r.mux.Group("job")
 	{
-		jobGroup.GET("/job/save", api.HandleJobCreate)
-		jobGroup.GET("/job/list", api.HandleJobList)
-		jobGroup.GET("/job/delete", api.HandleJobDelete)
+		jobHandler := job.New(r.db)
+		jobGroup.POST("/create", jobHandler.Create())
 	}
 }

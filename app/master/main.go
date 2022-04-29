@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hubogle/Crontab/app/master/config"
 	"github.com/hubogle/Crontab/app/master/initialize"
+	"github.com/hubogle/Crontab/app/master/router"
 	"log"
 	"net/http"
 	"os"
@@ -18,14 +19,14 @@ func init() {
 func main() {
 	var err error
 	cfg := config.GetConfig().App
-	router := initialize.Router()
-
+	// router := initialize.Router()
+	mux := router.NewHTTPServer()
 	src := &http.Server{
 		Addr: fmt.Sprintf("%s:%d",
 			cfg.Host,
 			cfg.Port,
 		),
-		Handler: router,
+		Handler: mux,
 	}
 	go func() {
 		if err = src.ListenAndServe(); err != nil {

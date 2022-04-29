@@ -6,6 +6,10 @@
 
 # 项目技术
 
+# 基于GIN的一些封装
+
+1. `pkg.core.context` 使用 `sync.Pool` 对 `*gin.Context` 做了封装，使得 `*gin.Context` 可以被复用。
+
 ## 常用包
 
 1. `gin`

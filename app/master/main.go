@@ -2,23 +2,39 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/hubogle/Crontab/app/master/global"
+	"github.com/hubogle/Crontab/app/master/config"
 	"github.com/hubogle/Crontab/app/master/initialize"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func init() {
-	initialize.InitConfig() // 初始化读取配置文件
+	initialize.InitLogger()
+	initialize.InitConfig()
 }
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	if err := r.Run(fmt.Sprintf("%s:%d", global.ServerConfig.Host, global.ServerConfig.Port)); err != nil {
-		panic(err)
+	var err error
+	cfg := config.GetConfig().App
+	router := initialize.Router()
+
+	src := &http.Server{
+		Addr: fmt.Sprintf("%s:%d",
+			cfg.Host,
+			cfg.Port,
+		),
+		Handler: router,
 	}
+	go func() {
+		if err = src.ListenAndServe(); err != nil {
+			log.Fatalf("listen: %s\n", err.Error())
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
 }

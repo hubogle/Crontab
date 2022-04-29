@@ -2,8 +2,9 @@ package initialize
 
 import (
 	"github.com/fsnotify/fsnotify"
-	"github.com/hubogle/Crontab/app/master/global"
+	"github.com/hubogle/Crontab/app/master/config"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 // InitConfig 配置文件初始化
@@ -13,20 +14,22 @@ func InitConfig() {
 		v            *viper.Viper
 		err          error
 	)
-	confFileName = "app/master/config/config-dev.json"
+	confFileName = "app/master/config/config-dev.toml"
+	Config := config.SetConfig()
 
 	v = viper.New()
 	v.SetConfigFile(confFileName)
 	if err = v.ReadInConfig(); err != nil {
-		panic(err)
+		zap.S().Fatalf("读取配置失败 %s", err.Error())
+
 	}
-	if err = v.Unmarshal(global.ServerConfig); err != nil {
-		panic(err)
+	if err = v.Unmarshal(Config); err != nil {
+		zap.S().Fatalf("读取配置失败 %s", err.Error())
 	}
 	// viper的功能 - 动态监控变化
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
 		_ = v.ReadInConfig()
-		_ = v.Unmarshal(global.ServerConfig)
+		_ = v.Unmarshal(Config)
 	})
 }

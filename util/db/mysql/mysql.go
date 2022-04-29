@@ -54,10 +54,12 @@ func (m Mysql) dbConnect() (*gorm.DB, error) {
 		err   error
 		db    *gorm.DB
 		sqlDb *sql.DB
+		DSN   string
 	)
+	DSN = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True", m.User, m.Pass,
+		m.Host, m.Port, m.DbName)
 	obj := mysql.New(mysql.Config{
-		DSN: fmt.Sprintf("gorm:%s@%s(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-			m.User, m.Pass, m.Host, m.Port, m.DbName),
+		DSN:                       DSN,
 		DefaultStringSize:         256,   // string 类型字段的默认长度
 		SkipInitializeWithVersion: false, // 根据当前 MySQL 版本自动配置
 	})
@@ -72,6 +74,5 @@ func (m Mysql) dbConnect() (*gorm.DB, error) {
 	sqlDb.SetMaxOpenConns(m.MaxOpenConn)
 	sqlDb.SetMaxIdleConns(m.MaxIdleConn)
 	sqlDb.SetConnMaxLifetime(time.Minute * m.MaxLifetimeConn)
-	// db.Use(&TracePlugin{}) // 使用插件
 	return db, nil
 }

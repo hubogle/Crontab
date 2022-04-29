@@ -45,7 +45,6 @@ func wrapHandlers(handlers ...HandlerFunc) []gin.HandlerFunc {
 }
 
 func New() (Mux, error) {
-	// gin.SetMode(gin.DebugMode) // 设置环境模式
-	mux := &mux{engine: gin.New()}
+	mux := &mux{engine: gin.Default()}
 	return mux, nil
 }

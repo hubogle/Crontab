@@ -15,18 +15,20 @@ type resource struct {
 	logger *zap.SugaredLogger // 日志
 }
 
+// NewHTTPServer 对路由初始化，以及一些上下文资源封装
 func NewHTTPServer() core.Mux {
 	var (
 		r      *resource
 		dbRepo mysql.Repo
 		err    error
+		mux    core.Mux
 	)
 	r = new(resource)
 	dbRepo, err = initialize.InitMySQL()
 	if err != nil {
 		zap.S().Fatal("new db err", zap.Error(err))
 	}
-	mux, err := core.New()
+	mux, err = core.New()
 	system := mux.Group("/")
 	{
 		system.GET("/ping", func(c core.Context) {

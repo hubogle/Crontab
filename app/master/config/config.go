@@ -6,9 +6,11 @@ var config = new(Config)
 
 type Config struct {
 	App struct {
-		Name string `mapstructure:"name"` // 项目名称
-		Host string `mapstructure:"host"`
-		Port int    `mapstructure:"port"` // 项目端口
+		Name     string `mapstructure:"name"` // 项目名称
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"` // 项目端口
+		RunMode  string `mapstructure:"runMode"`
+		Language string `mapstructure:"language"`
 	} `mapstructure:"app"`
 	MySQL struct {
 		Host            string        `mapstructure:"host"`

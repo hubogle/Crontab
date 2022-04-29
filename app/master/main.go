@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/hubogle/Crontab/app/master/config"
 	"github.com/hubogle/Crontab/app/master/initialize"
 	"github.com/hubogle/Crontab/app/master/router"
@@ -15,11 +16,12 @@ import (
 func init() {
 	initialize.InitLogger()
 	initialize.InitConfig()
+	_ = initialize.InitTrans()
 }
 func main() {
 	var err error
 	cfg := config.GetConfig().App
-	// router := initialize.Router()
+	gin.SetMode(cfg.RunMode)
 	mux := router.NewHTTPServer()
 	src := &http.Server{
 		Addr: fmt.Sprintf("%s:%d",

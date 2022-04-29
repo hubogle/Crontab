@@ -2,6 +2,8 @@ package core
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"net/http"
 	"sync"
 )
 
@@ -12,6 +14,9 @@ var _ Context = (*context)(nil)
 type Context interface {
 	init()
 	JSON(code int, v interface{})
+	JSONError(err BusinessError) // 返回错误信息
+	// ShouldBindJSON 反序列化，tag: `json:"xxx"`
+	ShouldBindJSON(obj interface{}) error
 }
 
 // context 进行封装
@@ -28,6 +33,23 @@ func (c *context) ResponseWriter() gin.ResponseWriter {
 }
 func (c *context) JSON(code int, obj interface{}) {
 	c.ctx.JSON(code, obj)
+}
+func (c *context) ShouldBindJSON(obj interface{}) error {
+	return c.ctx.ShouldBindWith(obj, binding.JSON)
+}
+func (c *context) JSONError(err BusinessError) {
+	if err != nil {
+		httpCode := err.HTTPCode()
+		if httpCode == 0 {
+			httpCode = http.StatusInternalServerError
+		}
+		c.ctx.JSON(httpCode, map[string]interface{}{
+			"code": err.BusinessCode(),
+			"msg":  err.Message(),
+		})
+		// c.ctx.AbortWithStatus(httpCode)
+		// c.ctx.Set("_abort_error_", err)
+	}
 }
 
 var contextPool = &sync.Pool{

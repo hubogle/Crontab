@@ -1,0 +1,9 @@
+POST http://{{host}}:{{port}}/job/create
+Content-Type: application/json
+
+{
+  "status": 999,
+  "name": "hello",
+  "command": "echo hello",
+  "cronExpr": "* * * * *"
+}

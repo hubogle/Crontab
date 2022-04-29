@@ -1,10 +1,28 @@
 # Crontab 分布式调度项目
 
+# 目录结构
+
+``shell
+├── app
+│ ├── Jobs
+│ ├── master
+│ └── worker    
+├── cmd
+│ └── generdate # 通过 gorm-gen 生成 Model
+├── go.mod
+├── README.MD
+├── test
+│ └── api # http api 接口测试
+└── util
+├── db # Db 工具包
+└── validation # validator 共用方法
+``
+
+# 项目介绍
+
 `master` 负责任务创建，页面接口对接
 `worker` 负责任务的调度，以及任务的执行
 `jobs` 一些需要被调度的任务执行逻辑
-
-# 项目技术
 
 # 基于GIN的一些封装
 
@@ -15,6 +33,7 @@
 1. `gin`
 2. `viper`
 3. `gorm`
+5. [Gorm-Gen](https://github.com/go-gorm/gen/blob/master/README.ZH_CN.md)
 
 ## 三方工具
 

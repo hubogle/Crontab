@@ -7,3 +7,13 @@ Content-Type: application/json
   "command": "echo hello",
   "cronExpr": "* * * * *"
 }
+
+### 删除
+POST http://{{host}}:{{port}}/job/delete
+
+
+### 查询列表
+GET http://{{host}}:{{port}}/job/list?offset=0&limit=10
+
+### 查询详情
+GET http://{{host}}:{{port}}/job/detail/1

@@ -27,4 +27,5 @@ const (
 	JobListError   = 20102
 	JobDeleteError = 20103
 	JobUpdateError = 20104
+	JobDetailError = 20105
 )

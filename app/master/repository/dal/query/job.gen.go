@@ -32,6 +32,7 @@ func newJob(db *gorm.DB) job {
 	_job.CronExpr = field.NewString(tableName, "cronExpr")
 	_job.PlanTime = field.NewTime(tableName, "planTime")
 	_job.NextTime = field.NewTime(tableName, "nextTime")
+	_job.IsDelete = field.NewBool(tableName, "isDelete")
 	_job.Created = field.NewTime(tableName, "created")
 	_job.Updated = field.NewTime(tableName, "updated")
 
@@ -51,6 +52,7 @@ type job struct {
 	CronExpr field.String
 	PlanTime field.Time
 	NextTime field.Time
+	IsDelete field.Bool
 	Created  field.Time
 	Updated  field.Time
 
@@ -76,6 +78,7 @@ func (j *job) updateTableName(table string) *job {
 	j.CronExpr = field.NewString(table, "cronExpr")
 	j.PlanTime = field.NewTime(table, "planTime")
 	j.NextTime = field.NewTime(table, "nextTime")
+	j.IsDelete = field.NewBool(table, "isDelete")
 	j.Created = field.NewTime(table, "created")
 	j.Updated = field.NewTime(table, "updated")
 
@@ -100,7 +103,7 @@ func (j *job) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (j *job) fillFieldMap() {
-	j.fieldMap = make(map[string]field.Expr, 9)
+	j.fieldMap = make(map[string]field.Expr, 10)
 	j.fieldMap["id"] = j.ID
 	j.fieldMap["name"] = j.Name
 	j.fieldMap["status"] = j.Status
@@ -108,6 +111,7 @@ func (j *job) fillFieldMap() {
 	j.fieldMap["cronExpr"] = j.CronExpr
 	j.fieldMap["planTime"] = j.PlanTime
 	j.fieldMap["nextTime"] = j.NextTime
+	j.fieldMap["isDelete"] = j.IsDelete
 	j.fieldMap["created"] = j.Created
 	j.fieldMap["updated"] = j.Updated
 }

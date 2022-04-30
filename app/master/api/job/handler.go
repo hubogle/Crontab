@@ -11,6 +11,9 @@ var _ Handler = (*handler)(nil)
 type Handler interface {
 	i()
 	Create() core.HandlerFunc
+	Delete() core.HandlerFunc
+	Detail() core.HandlerFunc
+	List() core.HandlerFunc
 }
 
 func (h *handler) i() {}

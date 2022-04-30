@@ -8,6 +8,9 @@ func setUserRouter(r *resource) {
 	jobGroup := r.mux.Group("job")
 	{
 		jobHandler := job.New(r.db)
+		jobGroup.GET("/detail/:id", jobHandler.Detail())
+		jobGroup.GET("/list", jobHandler.List())
 		jobGroup.POST("/create", jobHandler.Create())
+		jobGroup.POST("/delete", jobHandler.Delete())
 	}
 }

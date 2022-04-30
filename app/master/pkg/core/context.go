@@ -17,6 +17,8 @@ type Context interface {
 	JSONError(err BusinessError) // 返回错误信息
 	// ShouldBindJSON 反序列化，tag: `json:"xxx"`
 	ShouldBindJSON(obj interface{}) error
+	ShouldBindURI(obj interface{}) error // 需要传递指针
+	ShouldBindQuery(obj interface{}) error
 }
 
 // context 进行封装
@@ -31,6 +33,17 @@ func (c *context) init() {
 func (c *context) ResponseWriter() gin.ResponseWriter {
 	return c.ctx.Writer
 }
+
+// ShouldBindQuery 反序列化querystring tag: `form:"xxx"`
+func (c *context) ShouldBindQuery(obj interface{}) error {
+	return c.ctx.ShouldBindWith(obj, binding.Query)
+}
+
+// ShouldBindURI 反序列化path参数(如路由路径为 /user/:name)	tag: `uri:"xxx"`
+func (c *context) ShouldBindURI(obj interface{}) error {
+	return c.ctx.ShouldBindUri(obj)
+}
+
 func (c *context) JSON(code int, obj interface{}) {
 	c.ctx.JSON(code, obj)
 }
@@ -47,8 +60,6 @@ func (c *context) JSONError(err BusinessError) {
 			"code": err.BusinessCode(),
 			"msg":  err.Message(),
 		})
-		// c.ctx.AbortWithStatus(httpCode)
-		// c.ctx.Set("_abort_error_", err)
 	}
 }
 

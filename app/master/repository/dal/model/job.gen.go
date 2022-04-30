@@ -19,6 +19,7 @@ type Job struct {
 	CronExpr string    `gorm:"column:cronExpr;type:varchar(100);not null" json:"cronExpr"`
 	PlanTime time.Time `gorm:"column:planTime;type:datetime(6);not null" json:"planTime"`
 	NextTime time.Time `gorm:"column:nextTime;type:datetime(6);not null" json:"nextTime"`
+	IsDelete bool      `gorm:"column:isDelete;type:tinyint(1);not null" json:"isDelete"`
 	Created  time.Time `gorm:"column:created;type:datetime(6);not null;default:current_timestamp(6)" json:"created"`
 	Updated  time.Time `gorm:"column:updated;type:datetime(6);not null;default:current_timestamp(6)" json:"updated"`
 }

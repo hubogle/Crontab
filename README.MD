@@ -24,6 +24,11 @@
 `worker` 负责任务的调度，以及任务的执行
 `jobs` 一些需要被调度的任务执行逻辑
 
+## master
+
+1. `Gin` 提供 `Job` 的增删改查功能。
+2. 通过 `consul` 操作 `cron/jobs/` 前缀 `key`，通过 `worker` 节点进行 `watch` 任务的变动。
+
 ## worker
 
 1. 将服务注册到 `consul` 负责服务发现功能；

@@ -97,16 +97,17 @@ func (jobMgr *JobMgr) NewJobLock(jobName string) (jobLock *JobLock) {
 // InitJobMgr 初始化 Job 监听管理
 func InitJobMgr() (err error) {
 	var (
-		config *api.Config
-		client *api.Client
-		kv     *api.KV
+		client  *api.Client
+		kv      *api.KV
+		address string
 	)
-	config = &api.Config{
-		Address: "127.0.0.1:8500",
+	cfg := config.GetConfig().Consul
+	address = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	apiConfig := &api.Config{
+		Address: address,
 		Scheme:  "http",
 	}
-
-	client, err = api.NewClient(config)
+	client, err = api.NewClient(apiConfig)
 	if err != nil {
 		panic(err)
 	}

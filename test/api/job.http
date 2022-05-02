@@ -2,14 +2,19 @@ POST http://{{host}}:{{port}}/job/create
 Content-Type: application/json
 
 {
-  "status": 999,
-  "name": "hello",
+  "status": 2,
+  "name": "hello1",
   "command": "echo hello",
-  "cronExpr": "* * * * *"
+  "cronExpr": "*/5 * * * * * * *"
 }
 
 ### 删除
 POST http://{{host}}:{{port}}/job/delete
+Content-Type: application/json
+
+{
+  "id": 8
+}
 
 
 ### 查询列表

@@ -1,16 +1,20 @@
 [app]
-  name = "crontab"
-  host = "127.0.0.1"
-  port = 8080
-  language = "zh"
-  runMode = "debug"
+name = "crontab"
+host = "127.0.0.1"
+port = 8080
+language = "zh"
+runMode = "debug"
 
 [mysql]
-  host = "tencent"
-  port = 3306
-  user = "root"
-  pass = "Qwer1234"
-  dbname = "crontab"
-  maxLifeTimeConn = 60
-  maxIdleConn = 60
-  maxOpenConn = 10
+host = "tencent"
+port = 3306
+user = "root"
+pass = "Qwer1234"
+dbname = "crontab"
+maxLifeTimeConn = 60
+maxIdleConn = 60
+maxOpenConn = 10
+
+[consul]
+host = "127.0.0.1"
+port = 8500

@@ -9,10 +9,10 @@ import (
 )
 
 type createRequest struct {
-	Name     string `form:"name" binding:"required"`     // 任务名称
-	Status   int    `form:"status" binding:"required"`   // 任务状态
-	Command  string `form:"command" binding:"required"`  // shell 命令
-	CronExpr string `form:"cronExpr" binding:"required"` // cron 表达式
+	Name     string `form:"name" binding:"required"`               // 任务名称
+	Status   int    `form:"status" binding:"required,min=1,max=3"` // 任务状态
+	Command  string `form:"command" binding:"required"`            // shell 命令
+	CronExpr string `form:"cronExpr" binding:"required"`           // cron 表达式
 }
 
 type createResponse struct {

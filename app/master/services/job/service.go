@@ -1,6 +1,7 @@
 package job
 
 import (
+	"github.com/hashicorp/consul/api"
 	"github.com/hubogle/Crontab/app/master/pkg/core"
 	"github.com/hubogle/Crontab/app/master/repository/dal/model"
 	"github.com/hubogle/Crontab/util/db/mysql"
@@ -17,13 +18,15 @@ type Service interface {
 }
 
 type service struct {
-	db mysql.Repo
+	db           mysql.Repo
+	consulClient *api.Client
 }
 
 func (s *service) i() {}
 
-func New(db mysql.Repo) Service {
+func New(db mysql.Repo, client *api.Client) Service {
 	return &service{
-		db: db,
+		db:           db,
+		consulClient: client,
 	}
 }

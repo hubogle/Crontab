@@ -1,6 +1,7 @@
 package job
 
 import (
+	"github.com/hashicorp/consul/api"
 	"github.com/hubogle/Crontab/app/master/pkg/core"
 	"github.com/hubogle/Crontab/app/master/services/job"
 	"github.com/hubogle/Crontab/util/db/mysql"
@@ -20,10 +21,15 @@ func (h *handler) i() {}
 
 // handler 抽离每个接口需要的资源
 type handler struct {
-	repo      mysql.Repo
-	jobServer job.Service
+	repo         mysql.Repo
+	consulClient *api.Client
+	jobServer    job.Service
 }
 
-func New(db mysql.Repo) Handler {
-	return &handler{repo: db, jobServer: job.New(db)}
+func New(db mysql.Repo, client *api.Client) Handler {
+	return &handler{
+		repo:         db,
+		consulClient: client,
+		jobServer:    job.New(db, client),
+	}
 }

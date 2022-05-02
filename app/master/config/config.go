@@ -22,6 +22,10 @@ type Config struct {
 		MaxIdleConn     int           `mapstructure:"maxIdleConn"`
 		MaxLifeTimeConn time.Duration `mapstructure:"maxLifeTimeConn"`
 	} `mapstructure:"mysql"`
+	Consul struct {
+		Host string `mapstructure:"host"`
+		Port int    `mapstructure:"port"`
+	} `mapstructure:"consul"`
 }
 
 func GetConfig() Config {

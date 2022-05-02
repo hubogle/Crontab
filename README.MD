@@ -29,7 +29,16 @@
 1. 将服务注册到 `consul` 负责服务发现功能；
 2. 使用 `consul` 的 `KV` 将每个任务的配置信息进行保存；
 3. 利用 `consul` 的 `watch` 机制对某个目录下所有的 `key` 进行监控；
-4. 根据 `key` 的值是否修改，将任务放入到 `scheduler` 中进行调度；
+4. 监听前缀目录`cron/jobs/`所有任务的状态，将任务放入到 `scheduler` 中进行调度；
+5. 使用 `consul` 中 `Session` 配合 `Lock` 实现分布式锁，防止任务并发执行；
+   1. 首先申请一个 `Session`，设置 `TTL` 时间为 `20s`。
+   2. 基于该 `Session` 对 `KV` 调用 `Acquire` 进行锁的获取。
+   3. 若其中一个节点获取到了锁，则进行该任务的执行。
+   4. 启动一个 `goroutine` 对该 `Session` 进行 `Renew` 操作，每隔 `20s` 进行一次 `Renew` 操作。
+   5. 当任务执行完成后，对该 `Session` 的 `KV` 调用 `Release` 方法释放锁（也可等 `TTL` 到期自动删除）。
+   6. 停止掉 `goroutine` 对 `Session` 的 `Renew` 操作。
+
+确保所有节点都有机会执行任务，引入随机睡眠 `0~1s`。
 
 # 基于GIN的一些封装
 

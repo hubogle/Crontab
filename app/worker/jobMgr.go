@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/consul/api/watch"
 	"github.com/hubogle/Crontab/app/worker/common"
 	"github.com/hubogle/Crontab/app/worker/config"
-	"github.com/hubogle/Crontab/app/worker/scheduler"
 )
 
 type JobMgr struct {
@@ -40,7 +39,7 @@ func (jobMgr *JobMgr) watchJobs() (err error) {
 				if job, err = common.UnpackJob(v.Value); err == nil {
 					jobEvent = common.NewJobEvent(config.JOB_EVENT_SAVE, job)
 					oldKvMap[v.Key] = v
-					scheduler.GScheduler.PushJobEvent(jobEvent) // 发送 Save 事件
+					GScheduler.PushJobEvent(jobEvent) // 发送 Save 事件
 				}
 			}
 		} else {
@@ -51,13 +50,13 @@ func (jobMgr *JobMgr) watchJobs() (err error) {
 					if job, err = common.UnpackJob(v.Value); err == nil {
 						jobEvent = common.NewJobEvent(config.JOB_EVENT_SAVE, job)
 						oldKvMap[v.Key] = v
-						scheduler.GScheduler.PushJobEvent(jobEvent) // 发送 Save 事件
+						GScheduler.PushJobEvent(jobEvent) // 发送 Save 事件
 					}
 				} else if oldKvMap[v.Key].ModifyIndex != v.ModifyIndex { // 修改 Job
 					if job, err = common.UnpackJob(v.Value); err == nil {
 						jobEvent = common.NewJobEvent(config.JOB_EVENT_SAVE, job)
 						oldKvMap[v.Key] = v
-						scheduler.GScheduler.PushJobEvent(jobEvent) // 发送 Save 事件
+						GScheduler.PushJobEvent(jobEvent) // 发送 Save 事件
 					}
 				}
 			}
@@ -68,7 +67,7 @@ func (jobMgr *JobMgr) watchJobs() (err error) {
 						Name: jobName,
 					}
 					jobEvent = common.NewJobEvent(config.JOB_EVENT_DELETE, job)
-					scheduler.GScheduler.PushJobEvent(jobEvent) // 发送 Delete 事件
+					GScheduler.PushJobEvent(jobEvent) // 发送 Delete 事件
 				}
 			}
 			oldKvMap = newKvMap
@@ -89,6 +88,12 @@ func (jobMgr *JobMgr) watchKiller() (err error) {
 	return
 }
 
+// NewJobLock 创建任务分布式锁
+func (jobMgr *JobMgr) NewJobLock(jobName string) (jobLock *JobLock) {
+	jobLock = NewJobLock(jobName, jobMgr.client)
+	return
+}
+
 // InitJobMgr 初始化 Job 监听管理
 func InitJobMgr() (err error) {
 	var (
@@ -96,8 +101,10 @@ func InitJobMgr() (err error) {
 		client *api.Client
 		kv     *api.KV
 	)
-	config = api.DefaultConfig()
-	config.Address = "127.0.0.1:8500"
+	config = &api.Config{
+		Address: "127.0.0.1:8500",
+		Scheme:  "http",
+	}
 
 	client, err = api.NewClient(config)
 	if err != nil {

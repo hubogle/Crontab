@@ -1,4 +1,4 @@
-package scheduler
+package main
 
 import (
 	"fmt"
@@ -90,8 +90,8 @@ func (scheduler *Scheduler) TryStartJob(jobPlan *common.JobSchedulePlan) {
 	// 保存执行状态
 	scheduler.jobExecutingTable[jobPlan.Job.Name] = jobExecuteInfo
 	// 执行任务
-	fmt.Println("执行任务：", jobExecuteInfo.Job.Name, jobExecuteInfo.PlanTime, jobExecuteInfo.RealTime)
-	// G_executor.ExecuteJob(jobExecuteInfo) // TODO 真实执行任务
+	// fmt.Println("执行任务：", jobExecuteInfo.Job.Name, jobExecuteInfo.PlanTime, jobExecuteInfo.RealTime)
+	GExecutor.ExecuteJob(jobExecuteInfo) // 调度器真实执行任务
 }
 
 // handleJobEvent 处理任务事件，保存、删除、停止任务

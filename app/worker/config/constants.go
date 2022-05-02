@@ -4,6 +4,9 @@ const (
 	// JOB_SAVE_DIR 任务保存目录
 	JOB_SAVE_DIR = "cron/jobs/"
 
+	// JOB_LOCK_DIR 任务锁目录
+	JOB_LOCK_DIR = "cron/lock/"
+
 	// JOB_EVENT_SAVE 保存任务事件
 	JOB_EVENT_SAVE = 1
 

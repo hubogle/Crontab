@@ -1,0 +1,14 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option go_package = ".;proto";
+
+service Job{
+  rpc UpdateJob(UpdateJobInfo) returns (google.protobuf.Empty);
+}
+
+message UpdateJobInfo{
+  uint32 jobId = 1; // Job 任务 ID
+  uint32 status = 2; // Job 执行的状态
+  uint64 planTime = 3; // Job 本次任务执行时间
+  uint64 nextTime = 4; // Job 下次执行时间
+}

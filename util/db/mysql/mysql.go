@@ -56,7 +56,7 @@ func (m Mysql) dbConnect() (*gorm.DB, error) {
 		sqlDb *sql.DB
 		DSN   string
 	)
-	DSN = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True", m.User, m.Pass,
+	DSN = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", m.User, m.Pass,
 		m.Host, m.Port, m.DbName)
 	obj := mysql.New(mysql.Config{
 		DSN:                       DSN,

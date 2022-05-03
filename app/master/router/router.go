@@ -46,6 +46,7 @@ func NewHTTPServer() core.Mux {
 	r.consulClient = consulClient
 	r.logger = zap.S()
 	r.mux = mux
-	setUserRouter(r)
+	setJobRouter(r) // 设置 job gin 路径
+	setJobGRPC(r)   // 设置 job rPRC 路径
 	return mux
 }

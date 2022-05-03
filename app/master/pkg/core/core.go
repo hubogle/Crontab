@@ -2,6 +2,8 @@ package core
 
 import (
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"net"
 	"net/http"
 )
 
@@ -12,10 +14,13 @@ type RouterGroup interface {
 }
 type Mux interface {
 	http.Handler
-	Group(relativePath string, handlers ...HandlerFunc) RouterGroup
+	Group(relativePath string, handlers ...HandlerFunc) RouterGroup // Gin 路由分组
+	RegisterServer(srv interface{}, srvDesc *grpc.ServiceDesc)      // 注册 gRPC 服务
+	Serve(lis net.Listener) error
 }
 type mux struct {
 	engine *gin.Engine
+	grpc   *grpc.Server
 }
 
 // ServeHTTP 实现http.Handler接口
@@ -28,6 +33,15 @@ func (m *mux) Group(relativePath string, handlers ...HandlerFunc) RouterGroup {
 	return &router{
 		group: m.engine.Group(relativePath, wrapHandlers(handlers...)...),
 	}
+}
+
+// RegisterServer 封装 gRPC 的方法，srv 为 Server 服务，srvDesc 为服务描述
+func (m *mux) RegisterServer(srv interface{}, srvDesc *grpc.ServiceDesc) {
+	m.grpc.RegisterService(srvDesc, srv)
+}
+
+func (m *mux) Serve(lis net.Listener) error {
+	return m.grpc.Serve(lis)
 }
 
 // 单独对 gin.HandlerFunc 进行处理，主要就是对 gin.Context 进行包装，通过 Pool 实现资源池
@@ -45,6 +59,6 @@ func wrapHandlers(handlers ...HandlerFunc) []gin.HandlerFunc {
 }
 
 func New() (Mux, error) {
-	mux := &mux{engine: gin.Default()}
+	mux := &mux{engine: gin.Default(), grpc: grpc.NewServer()}
 	return mux, nil
 }

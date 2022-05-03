@@ -6,7 +6,9 @@ import (
 	"github.com/hubogle/Crontab/app/master/config"
 	"github.com/hubogle/Crontab/app/master/initialize"
 	"github.com/hubogle/Crontab/app/master/router"
+	"go.uber.org/zap"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,19 +22,30 @@ func init() {
 }
 func main() {
 	var err error
-	cfg := config.GetConfig().App
-	gin.SetMode(cfg.RunMode)
+	cfg := config.GetConfig()
+	gin.SetMode(cfg.App.RunMode)
 	mux := router.NewHTTPServer()
 	src := &http.Server{
 		Addr: fmt.Sprintf("%s:%d",
-			cfg.Host,
-			cfg.Port,
+			cfg.App.Host,
+			cfg.App.Port,
 		),
 		Handler: mux,
 	}
+	address := fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port)
+	listen, err := net.Listen("tcp", address)
+	if err != nil {
+		zap.S().Fatalf("gRPC failed to listen %s\n", err.Error())
+	}
 	go func() {
 		if err = src.ListenAndServe(); err != nil {
-			log.Fatalf("listen: %s\n", err.Error())
+			log.Fatalf("gin listen: %s\n", err.Error())
+		}
+
+	}()
+	go func() {
+		if err = mux.Serve(listen); err != nil {
+			log.Fatalf("gRPC failed to serve %s\n", err.Error())
 		}
 	}()
 

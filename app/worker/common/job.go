@@ -41,6 +41,7 @@ func BuildJobExecuteInfo(jobSchedulePlan *JobSchedulePlan) (jobExecuteInfo *JobE
 		Job:      jobSchedulePlan.Job,
 		PlanTime: jobSchedulePlan.NextTime, // 计划执行时间
 		RealTime: time.Now(),               // 真实执行时间
+		NextTime: jobSchedulePlan.NextTime, // 下次执行时间
 	}
 	jobExecuteInfo.CancelCtx, jobExecuteInfo.CancelFunc = context.WithCancel(context.TODO())
 	return

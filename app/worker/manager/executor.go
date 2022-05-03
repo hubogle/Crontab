@@ -38,12 +38,14 @@ func (executor *Executor) ExecuteJob(info *common.JobExecuteInfo) {
 			result.EndTime = time.Now()
 		} else {
 			// TODO 临时先执行 SHELL 命令
-			result.StartTime = time.Now() // 任务真正执行时间
+			result.StartTime = time.Now()                                                                    // 任务真正执行时间
+			go GJobMgr.UpdateJob(info.Job.Id, common.Running, result.StartTime.Unix(), info.NextTime.Unix()) // gRPC 修改程序执行状态
 			cmd = exec.CommandContext(info.CancelCtx, "/bin/bash", "-c", info.Job.Command)
 			output, err = cmd.CombinedOutput()
 			result.EndTime = time.Now()
 			result.Output = output
 			result.Err = err
+			go GJobMgr.UpdateJob(info.Job.Id, common.Pending, result.StartTime.Unix(), info.NextTime.Unix())
 		}
 		// 返回调度器给 Scheduler，然后从调度器中删除执行完成的任务
 		fmt.Println(result, info.Job.Id)

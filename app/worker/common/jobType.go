@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+const (
+	_        int32 = iota
+	Pending        // 1 等待执行
+	Running        // 2 执行中
+	Success        // 3 执行成功
+	Kill           // 4 停止当前任务
+	Canceled       // 5 任务被强制取消
+)
+
 // Job 任务定义
 type Job struct {
 	Id       int    `json:"id"`       // 任务 ID
@@ -32,6 +41,7 @@ type JobExecuteInfo struct {
 	Job        *Job               // 任务信息
 	PlanTime   time.Time          // 理论上的调度时间
 	RealTime   time.Time          // 实际的调度时间
+	NextTime   time.Time          // 下次执行时间
 	CancelCtx  context.Context    // 用于取消任务的上下文
 	CancelFunc context.CancelFunc // 用于取消任务的函数
 }

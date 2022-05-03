@@ -12,6 +12,10 @@ type Config struct {
 		RunMode  string `mapstructure:"runMode"`
 		Language string `mapstructure:"language"`
 	} `mapstructure:"app"`
+	Grpc struct { // 提供 gRPC 服务的端口
+		Host string `mapstructure:"host"`
+		Port int    `mapstructure:"port"` // grpc 提供的端口
+	} `mapstructure:"grpc"`
 	MySQL struct {
 		Host            string        `mapstructure:"host"`
 		Port            int           `mapstructure:"port"`

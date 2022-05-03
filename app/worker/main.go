@@ -1,18 +1,27 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hubogle/Crontab/app/worker/config"
 	"github.com/hubogle/Crontab/app/worker/initialize"
-	"github.com/hubogle/Crontab/app/worker/manager"
 	utils "github.com/hubogle/Crontab/util"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func init() {
 	initialize.InitLogger()
 	initialize.InitConfig()
-	// initialize.InitRegister()
+	initialize.InitRegister() // consul 服务注册
+	initialize.InitManager()  // Job Manager
 }
 func main() {
 	var (
@@ -20,32 +29,51 @@ func main() {
 		err  error
 	)
 	router := gin.Default()
+	cfg := config.GetConfig()
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
-	// Job 执行器
-	if err := manager.InitExecutor(); err != nil {
-		panic(err)
-	}
-	// Job 调度器
-	if err := manager.InitScheduler(); err != nil {
-		panic(err)
-	}
-	// Job 管理器
-	if err := manager.InitJobMgr(); err != nil {
-		panic(err)
-	}
-	if config.GetConfig().App.RunMode == gin.DebugMode {
+	port = cfg.App.Port
+	if cfg.App.RunMode == gin.DebugMode {
 		if port, err = utils.GetFreePort(); err != nil {
 			panic(err)
 		}
-	} else {
-		port = config.GetConfig().App.Port
 	}
-	addres := fmt.Sprintf("%s:%d", config.GetConfig().App.Host, port)
-	router.Run(addres)
-	// TODO 任务停止后续的清理工作
-	// TODO 需要停止所有对 key 的上锁操作
+	src := &http.Server{
+		Addr: fmt.Sprintf("%s:%d",
+			cfg.App.Host,
+			port,
+		),
+		Handler: router,
+	}
+	grpcAddress := fmt.Sprintf("%s:%d",
+		cfg.Grpc.Host,
+		cfg.Grpc.Port,
+	)
+	go func() {
+		if err = src.ListenAndServe(); err != nil {
+			log.Fatalf("listen: %s\n", err.Error())
+		}
+	}()
+	gRpcConn, err := grpc.Dial(grpcAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer gRpcConn.Close()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	if err := src.Shutdown(ctx); err != nil {
+		initialize.UnRegister() // 注销 consul 服务
+		// TODO 当前执行的 Job 需要主动 kill 掉
+		// TODO 当前执行 Job 的 Lock 可以等待超时后自动释放，也可主动删除 key
+		fmt.Printf("Server Shutdown: %v\n", err)
+	}
+	fmt.Printf("Server exiting\n")
 }

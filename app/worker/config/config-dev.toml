@@ -6,6 +6,11 @@ language = "zh"
 runMode = "debug"
 tag = ["worker", "crontab", "dev"]
 
+[grpc]
+host = "127.0.0.1"
+port = 3000
+maxTimeConn = 10
+
 [mysql]
 host = "tencent"
 port = 3306

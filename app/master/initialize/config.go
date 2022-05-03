@@ -21,7 +21,6 @@ func InitConfig() {
 	v.SetConfigFile(confFileName)
 	if err = v.ReadInConfig(); err != nil {
 		zap.S().Fatalf("读取配置失败 %s", err.Error())
-
 	}
 	if err = v.Unmarshal(Config); err != nil {
 		zap.S().Fatalf("读取配置失败 %s", err.Error())

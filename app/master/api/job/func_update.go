@@ -17,10 +17,6 @@ type updateRequest struct {
 	CronExpr string `form:"cronExpr"`                     // cron 表达式
 }
 
-type updateResponse struct {
-	Id int32 `json:"id"`
-}
-
 // Update 修改 Job 任务的状态 结束任务、停止任务
 func (h *handler) Update() core.HandlerFunc {
 	return func(c core.Context) {

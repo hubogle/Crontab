@@ -5,6 +5,10 @@ port = 8080
 language = "zh"
 runMode = "debug"
 
+[grpc]
+host = "127.0.0.1"
+port = 3000
+
 [mysql]
 host = "tencent"
 port = 3306

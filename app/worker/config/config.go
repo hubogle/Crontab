@@ -13,6 +13,11 @@ type Config struct {
 		RunMode  string   `mapstructure:"runMode"`
 		Language string   `mapstructure:"language"`
 	} `mapstructure:"app"`
+	Grpc struct { // 调用 master 提供的 gRPC 接口
+		Host        string        `mapstructure:"host"`
+		Port        int           `mapstructure:"port"`
+		MaxTimeConn time.Duration `mapstructure:"maxTimeConn"` // 时间单位 S
+	} `mapstructure:"grpc"`
 	MySQL struct {
 		Host            string        `mapstructure:"host"`
 		Port            int           `mapstructure:"port"`

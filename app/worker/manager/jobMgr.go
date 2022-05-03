@@ -1,16 +1,24 @@
 package manager
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
 	"github.com/hubogle/Crontab/app/worker/common"
 	"github.com/hubogle/Crontab/app/worker/config"
+	"github.com/hubogle/Crontab/proto"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"time"
 )
 
 type JobMgr struct {
-	client *api.Client
-	kv     *api.KV
+	client    *api.Client
+	kv        *api.KV
+	rpcClient proto.JobClient
+	timeOut   time.Duration
 }
 
 var (
@@ -121,6 +129,21 @@ func (jobMgr *JobMgr) NewJobLock(jobId int) (jobLock *JobLock) {
 	return
 }
 
+// UpdateJob 调用 gRPC 更改数据库状态
+func (jobMgr *JobMgr) UpdateJob(jobId int, status int32, planTime int64, nextTime int64) {
+	ctx, cancel := context.WithTimeout(context.Background(), jobMgr.timeOut*time.Second)
+	defer cancel()
+	_, err := jobMgr.rpcClient.UpdateJob(ctx, &proto.UpdateJobInfo{
+		JobId:    uint32(jobId),
+		Status:   uint32(status),
+		PlanTime: uint64(planTime),
+		NextTime: uint64(nextTime),
+	})
+	if err != nil {
+		zap.S().Error("RPC 修改失败:", err.Error())
+	}
+}
+
 // DeleteKey 删除 Key
 func (jobMgr *JobMgr) DeleteKey(jobId int, event int) error {
 	var (
@@ -145,24 +168,34 @@ func (jobMgr *JobMgr) DeleteKey(jobId int, event int) error {
 // InitJobMgr 初始化 Job 监听管理
 func InitJobMgr() (err error) {
 	var (
-		client  *api.Client
-		kv      *api.KV
-		address string
+		client    *api.Client
+		kv        *api.KV
+		conn      *grpc.ClientConn
+		address   string
+		rpcClient proto.JobClient
 	)
-	cfg := config.GetConfig().Consul
-	address = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	cfg := config.GetConfig()
+	address = fmt.Sprintf("%s:%d", cfg.Consul.Host, cfg.Consul.Port)
 	apiConfig := &api.Config{
 		Address: address,
 		Scheme:  "http",
 	}
-	client, err = api.NewClient(apiConfig)
+	client, err = api.NewClient(apiConfig) // 链接 Consul
 	if err != nil {
 		panic(err)
 	}
+	address = fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port)
+	conn, err = grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	rpcClient = proto.NewJobClient(conn)
+	if err != nil {
+		zap.S().Panic("RPC 链接失败:", err.Error())
+	}
 	kv = client.KV()
 	GJobMgr = &JobMgr{
-		client: client,
-		kv:     kv,
+		client:    client,
+		kv:        kv,
+		rpcClient: rpcClient,
+		timeOut:   cfg.Grpc.MaxTimeConn,
 	}
 	// 启动任务监听
 	if err = GJobMgr.watchJobs(); err != nil {

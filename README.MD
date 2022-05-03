@@ -28,6 +28,7 @@
 
 1. `Gin` 提供 `Job` 的增删改查功能。
 2. 通过 `consul` 操作 `cron/jobs/` 前缀 `key`，通过 `worker` 节点进行 `watch` 任务的变动。
+3. 通过 `consul` 操作 `cron/killer/` 通知 `worker` 节点停止任务。
 
 ## worker
 
@@ -42,6 +43,8 @@
    4. 启动一个 `goroutine` 对该 `Session` 进行 `Renew` 操作，每隔 `20s` 进行一次 `Renew` 操作。
    5. 当任务执行完成后，对该 `Session` 的 `KV` 调用 `Release` 方法释放锁（也可等 `TTL` 到期自动删除）。
    6. 停止掉 `goroutine` 对 `Session` 的 `Renew` 操作。
+6. `worker` 进行任务 `kill` 操作，通过 `context` 取消掉本次执行的任务。
+7. `worker` 执行 `Job` 完成后通过 `gRPC` 修改数据库中 `Job` 任务的状态
 
 确保所有节点都有机会执行任务，引入随机睡眠 `0~1s`。
 

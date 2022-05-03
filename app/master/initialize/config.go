@@ -14,7 +14,7 @@ func InitConfig() {
 		v            *viper.Viper
 		err          error
 	)
-	confFileName = "app/worker/config/config-dev.toml"
+	confFileName = "app/master/config/config-dev.toml"
 	Config := config.SetConfig()
 
 	v = viper.New()

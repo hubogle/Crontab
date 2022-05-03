@@ -8,6 +8,7 @@ import (
 
 // Job 任务定义
 type Job struct {
+	Id       int    `json:"id"`       // 任务 ID
 	Name     string `json:"name"`     // 任务名称
 	Command  string `json:"command"`  // 任务命令
 	CronExpr string `json:"cronExpr"` // cron表达式

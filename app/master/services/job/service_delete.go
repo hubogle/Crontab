@@ -3,7 +3,7 @@ package job
 import (
 	"context"
 	"github.com/hashicorp/consul/api"
-	"github.com/hubogle/Crontab/app/master/config"
+	"github.com/hubogle/Crontab/app/master/common"
 	"github.com/hubogle/Crontab/app/master/pkg/core"
 	"github.com/hubogle/Crontab/app/master/repository/dal/query"
 	"strconv"
@@ -25,7 +25,7 @@ func (s *service) Delete(ctx core.Context, deleteData *DeleteJobData) error {
 		return err
 	}
 	kv = s.consulClient.KV()
-	key := config.JOB_SAVE_DIR + strconv.Itoa(int(deleteData.Id))
+	key := common.JOB_SAVE_DIR + strconv.Itoa(int(deleteData.Id))
 	_, err = kv.Delete(key, nil)
 	return err
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/gorhill/cronexpr"
 	"github.com/hubogle/Crontab/app/worker/config"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,9 +23,16 @@ func UnpackJob(value []byte) (ret *Job, err error) {
 	return
 }
 
-// ExtractJobName 从 etcd 的 key 中提取任务名称
-func ExtractJobName(jobKey string) string {
-	return strings.TrimPrefix(jobKey, config.JOB_SAVE_DIR)
+// ExtractJobId 从 etcd 的 key 中提取任务名称
+func ExtractJobId(jobKey string) int {
+	id, _ := strconv.Atoi(strings.TrimPrefix(jobKey, config.JOB_SAVE_DIR))
+	return id
+}
+
+// ExtractKillerJobId 监听杀死任务名称
+func ExtractKillerJobId(killerKey string) int {
+	id, _ := strconv.Atoi(strings.TrimPrefix(killerKey, config.JOB_KILLER_DIR))
+	return id
 }
 
 // BuildJobExecuteInfo 构造任务执行信息

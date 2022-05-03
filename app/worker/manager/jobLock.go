@@ -1,10 +1,11 @@
-package main
+package manager
 
 import (
 	"github.com/hashicorp/consul/api"
 	"github.com/hubogle/Crontab/app/worker/config"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
+	"strconv"
 	"time"
 )
 
@@ -15,17 +16,17 @@ type JobLock struct {
 	client    *api.Client // consul 客户端
 	kv        *api.KV
 	session   *api.Session  // 创建 Session 对象
-	jobName   string        // 任务名称
+	jobId     int           // 任务ID
 	isLocked  bool          // 是否上锁成功
 	sessionId string        // 生成 Session 的唯一标识
 	lockKey   string        // 锁的key
 	stopCh    chan struct{} // 停止 Session 续期
 }
 
-func NewJobLock(jobName string, client *api.Client) *JobLock {
+func NewJobLock(jobId int, client *api.Client) *JobLock {
 	return &JobLock{
 		client:  client,
-		jobName: jobName,
+		jobId:   jobId,
 		kv:      client.KV(),
 		session: client.Session(),
 	}
@@ -37,7 +38,7 @@ func (j *JobLock) TryLock() (err error) {
 		createId   string // 创建 Session 后的唯一标识
 		isAcquired bool   // 是否抢锁成功
 	)
-	locKey = config.JOB_LOCK_DIR + j.jobName
+	locKey = config.JOB_LOCK_DIR + strconv.Itoa(j.jobId)
 	createId, _, err = j.client.Session().Create(&api.SessionEntry{
 		Name:      uuid.NewV4().String(),
 		Behavior:  "delete",
@@ -62,7 +63,7 @@ func (j *JobLock) TryLock() (err error) {
 	}
 }
 
-// Unlock 如果抢到锁的话释放锁
+// Unlock 如果抢到锁的话释放锁，且删除锁key
 func (j *JobLock) Unlock() {
 	if j.isLocked == true {
 		j.kv.Release(&api.KVPair{
@@ -72,6 +73,6 @@ func (j *JobLock) Unlock() {
 		if j.stopCh != nil {
 			close(j.stopCh)
 		}
-		// j.kv.Delete(j.lockKey, nil) // 删除 Key
+		j.kv.Delete(j.lockKey, nil) // 删除 Key
 	}
 }

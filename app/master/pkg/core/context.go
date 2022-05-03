@@ -18,6 +18,7 @@ type Context interface {
 	// ShouldBindJSON 反序列化，tag: `json:"xxx"`
 	ShouldBindJSON(obj interface{}) error
 	ShouldBindURI(obj interface{}) error // 需要传递指针
+	ShouldBind(obj interface{}) error
 	ShouldBindQuery(obj interface{}) error
 }
 
@@ -42,6 +43,10 @@ func (c *context) ShouldBindQuery(obj interface{}) error {
 // ShouldBindURI 反序列化path参数(如路由路径为 /user/:name)	tag: `uri:"xxx"`
 func (c *context) ShouldBindURI(obj interface{}) error {
 	return c.ctx.ShouldBindUri(obj)
+}
+
+func (c *context) ShouldBind(obj interface{}) error {
+	return c.ctx.ShouldBind(obj)
 }
 
 func (c *context) JSON(code int, obj interface{}) {

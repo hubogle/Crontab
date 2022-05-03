@@ -1,4 +1,4 @@
-package main
+package manager
 
 import (
 	"fmt"
@@ -27,8 +27,8 @@ func (executor *Executor) ExecuteJob(info *common.JobExecuteInfo) {
 			ExecuteInfo: info,
 			Output:      make([]byte, 0),
 		}
-		jobLock := GJobMgr.NewJobLock(info.Job.Name) // 分布式锁
-		result.StartTime = time.Now()                // 任务开始时间
+		jobLock := GJobMgr.NewJobLock(info.Job.Id) // 分布式锁
+		result.StartTime = time.Now()              // 任务开始时间
 		// 随机睡眠 0~1s ，确保多个节点，能够同时执行任务竞争均匀
 		time.Sleep(time.Millisecond * time.Duration(rand.Intn(1000)))
 		err := jobLock.TryLock()
@@ -46,7 +46,7 @@ func (executor *Executor) ExecuteJob(info *common.JobExecuteInfo) {
 			result.Err = err
 		}
 		// 返回调度器给 Scheduler，然后从调度器中删除执行完成的任务
-		fmt.Println(result.StartTime, string(result.Output))
+		fmt.Println(result, info.Job.Id)
 		GScheduler.PushJobResult(result)
 	}()
 }

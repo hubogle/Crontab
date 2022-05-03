@@ -15,6 +15,7 @@ type Handler interface {
 	Delete() core.HandlerFunc
 	Detail() core.HandlerFunc
 	List() core.HandlerFunc
+	Update() core.HandlerFunc
 }
 
 func (h *handler) i() {}

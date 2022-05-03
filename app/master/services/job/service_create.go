@@ -8,7 +8,6 @@ import (
 	"github.com/hubogle/Crontab/app/master/pkg/core"
 	"github.com/hubogle/Crontab/app/master/repository/dal/model"
 	"github.com/hubogle/Crontab/app/master/repository/dal/query"
-	"github.com/hubogle/Crontab/app/worker/config"
 	"strconv"
 )
 
@@ -35,11 +34,12 @@ func (s *service) Create(ctx core.Context, jobData *CreateJobData) (id int32, er
 	}
 	err = do.Create(job) // 创建数据库对象，任务对象
 	jobApi := common.Job{
-		Name:     jobData.Name,
-		Command:  jobData.Command,
-		CronExpr: jobData.CronExpr,
+		Id:       int(job.ID),
+		Name:     job.Name,
+		Command:  job.Command,
+		CronExpr: job.CronExpr,
 	}
-	key := config.JOB_SAVE_DIR + strconv.Itoa(int(job.ID)) // 根据任务创好的 ID 作为 key
+	key := common.JOB_SAVE_DIR + strconv.Itoa(int(job.ID)) // 根据任务创好的 ID 作为 key
 	if value, err = json.Marshal(jobApi); err == nil {
 		_, err = kv.Put(&api.KVPair{Key: key, Value: value}, nil)
 		if err != nil {

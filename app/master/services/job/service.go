@@ -15,6 +15,7 @@ type Service interface {
 	Delete(ctx core.Context, deleteData *DeleteJobData) error
 	List(ctx core.Context, listData *ListJobData) ([]*model.Job, int, error)
 	Detail(ctx core.Context, listData *DetailJobData) ([]*model.Job, error)
+	Update(ctx core.Context, jobData *UpdateJobData) (job model.Job, err error)
 }
 
 type service struct {

@@ -12,5 +12,6 @@ func setUserRouter(r *resource) {
 		jobGroup.GET("/list", jobHandler.List())
 		jobGroup.POST("/create", jobHandler.Create())
 		jobGroup.POST("/delete", jobHandler.Delete())
+		jobGroup.POST("/update", jobHandler.Update())
 	}
 }

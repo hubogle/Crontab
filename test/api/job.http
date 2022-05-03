@@ -1,11 +1,12 @@
+### 创建
 POST http://{{host}}:{{port}}/job/create
 Content-Type: application/json
 
 {
-  "status": 2,
-  "name": "hello1",
-  "command": "echo hello",
-  "cronExpr": "*/5 * * * * * * *"
+  "status": 1,
+  "name": "echo",
+  "command": "sleep 4",
+  "cronExpr": "*/10 * * * * * * *"
 }
 
 ### 删除
@@ -13,12 +14,24 @@ POST http://{{host}}:{{port}}/job/delete
 Content-Type: application/json
 
 {
-  "id": 8
+  "id": 18
 }
-
 
 ### 查询列表
 GET http://{{host}}:{{port}}/job/list?offset=0&limit=10
 
 ### 查询详情
 GET http://{{host}}:{{port}}/job/detail/1
+
+### 修改信息
+
+POST http://{{host}}:{{port}}/job/update
+Content-Type: application/json
+
+{
+  "id": 19,
+  "status": 5,
+  "name": "echo",
+  "command": "sleep 8",
+  "cronExpr": "*/10 * * * * * * *"
+}

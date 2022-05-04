@@ -2,33 +2,57 @@
 
 # 目录结构
 
-``shell
+```text
 ├── app
-│ ├── Jobs
-│ ├── master
-│ └── worker    
+│   ├── master
+│   │   ├── api                  // api 和 gRPC 接口
+│   │   ├── code                 // api 返回错误码定义
+│   │   ├── common               // 通用变量定义
+│   │   ├── config                // 配置文件
+│   │   ├── initialize           // 项目初始化定义
+│   │   ├── middleware           // 中间件
+│   │   ├── pkg                  // 核心工具包
+│   │   │   └── core
+│   │   ├── repository           // gorm-Gen 生成
+│   │   │   └── dal
+│   │   │       ├── model
+│   │   │       └── query
+│   │   ├── router               // 路由拆分
+│   │   └── services             // 服务层
+│   └── worker
+│       ├── common               // 通用变量定义
+│       ├── config                // 配置文件
+│       ├── initialize           // 项目初始化
+│       └── manager              // 管理器开发
 ├── cmd
-│ └── generdate # 通过 gorm-gen 生成 Model
-├── go.mod
-├── README.MD
-├── test
-│ └── api # http api 接口测试
+│   └── generate     // 自动生成 Mysql Model 脚本
+├── proto            // proto 协议文件
+├── test             
+│   └── api          // 测试 API 的 curl
 └── util
-├── db # Db 工具包
-└── validation # validator 共用方法
-``
+    ├── db           // database 操作
+    ├── json
+    ├── register     // 注册服务
+    └── validation   // validator 工具
+```
 
 # 项目介绍
 
-`master` 负责任务创建，页面接口对接
-`worker` 负责任务的调度，以及任务的执行
-`jobs` 一些需要被调度的任务执行逻辑
+分布式 crontab 调度项目
+
+* `master` 负责任务创建，页面接口对接
+* `worker` 负责任务的调度，以及任务的执行，`Worker` 可横向扩展部署。
+* `jobs` 一些需要被调度的任务执行逻辑
+
+![avatar](Crontab.png)
 
 ## master
 
-1. `Gin` 提供 `Job` 的增删改查功能。
-2. 通过 `consul` 操作 `cron/jobs/` 前缀 `key`，通过 `worker` 节点进行 `watch` 任务的变动。
-3. 通过 `consul` 操作 `cron/killer/` 通知 `worker` 节点停止任务。
+1. `Gin` 提供 `Job` 的增删改查 `API` 接口。
+2. `consul` 发现 `worker` 服务节点是否可用。
+3. 通过 `consul` 操作 `cron/jobs/` 前缀 `key`，通过 `worker` 节点进行 `watch` 任务的变动。
+4. 通过 `consul` 操作 `cron/killer/` 通知 `worker` 节点停止任务。
+5. `gRPC` 提供 `Worker` 节点修改 `Job` 数据库的 `API` 接口。
 
 ## worker
 
@@ -44,25 +68,30 @@
    5. 当任务执行完成后，对该 `Session` 的 `KV` 调用 `Release` 方法释放锁（也可等 `TTL` 到期自动删除）。
    6. 停止掉 `goroutine` 对 `Session` 的 `Renew` 操作。
 6. `worker` 进行任务 `kill` 操作，通过 `context` 取消掉本次执行的任务。
-7. `worker` 执行 `Job` 完成后通过 `gRPC` 修改数据库中 `Job` 任务的状态
+7. `worker` 执行 `Job` 完成后通过 `gRPC` 修改数据库中 `Job` 任务的状态，以及任务执行日志。
 
 确保所有节点都有机会执行任务，引入随机睡眠 `0~1s`。
 
 # 基于GIN的一些封装
 
 1. `pkg.core.context` 使用 `sync.Pool` 对 `*gin.Context` 做了封装，使得 `*gin.Context` 可以被复用。
+2. `pkg.core.core` 将 `gin Router` 和 `gRPC` 注册服务封装到 `Mux` 对象中。
+3. `gRPC` 链接的负载均衡，负责持久链接并且自动切换可用服务。
 
 ## 常用包
 
 1. `gin`
 2. `viper`
 3. `gorm`
-5. [Gorm-Gen](https://github.com/go-gorm/gen/blob/master/README.ZH_CN.md)
+4. `validator`()
+5. [Gorm-Gen](https://github.com/go-gorm/gen/blob/master/README.ZH_CN.md) `Gorm` 官方提供的 `Model` 方法生成工具
+6. [gRPC-load-balance](https://github.com/mbobakov/grpc-consul-resolver) `gRPC` 的链接的负载均衡。
+7. [Nacos-Go](https://github.com/nacos-group/nacos-sdk-go) 官方提供 `SDK` 包
 
 ## 三方工具
 
 1. `Consul` 服务注册发现
-2. `Loki` 日志监控
-3. `Grafana` 数据可视化
-4. `Prometheus` 数据监控
-5. `Nacos` 配置文件管理
+2. `Loki` 日志收集监控
+3. `Nacos` 配置文件管理中心
+4. `Grafana` 数据可视化
+5. `Prometheus` 数据监控

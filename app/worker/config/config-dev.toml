@@ -1,26 +1,8 @@
-[app]
-name = "crontab-worker"
-host = "127.0.0.1"
-port = 8081
-language = "zh"
-runMode = "debug"
-tag = ["worker", "crontab", "dev"]
-
-[grpc]
-host = "127.0.0.1"
-port = 3000
-maxTimeConn = 10
-
-[mysql]
-host = "tencent"
-port = 3306
-user = "root"
-pass = "Qwer1234"
-dbname = "crontab"
-maxLifeTimeConn = 60
-maxIdleConn = 60
-maxOpenConn = 10
-
-[consul]
-host = "127.0.0.1"
-port = 8500
+[nacos]
+host = 'http://tencent'
+port = '8848'
+namespace = '23a7ed60-938c-41b0-ae84-55b43a7214ee'
+user = 'nacos'
+password = 'nacos'
+dataId = 'worker'
+group = 'dev'

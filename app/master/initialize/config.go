@@ -1,8 +1,11 @@
 package initialize
 
 import (
-	"github.com/fsnotify/fsnotify"
+	"encoding/json"
 	"github.com/hubogle/Crontab/app/master/config"
+	"github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -26,9 +29,35 @@ func InitConfig() {
 		zap.S().Fatalf("读取配置失败 %s", err.Error())
 	}
 	// viper的功能 - 动态监控变化
-	v.WatchConfig()
-	v.OnConfigChange(func(e fsnotify.Event) {
-		_ = v.ReadInConfig()
-		_ = v.Unmarshal(Config)
+	// v.WatchConfig()
+	// v.OnConfigChange(func(e fsnotify.Event) {
+	// 	_ = v.ReadInConfig()
+	// 	_ = v.Unmarshal(Config)
+	// })
+
+	clientConfig := constant.ClientConfig{
+		NamespaceId:         Config.NacosConfig.Namespace,
+		TimeoutMs:           5000,
+		NotLoadCacheAtStart: true,
+		LogDir:              "tmp/nacos/log",
+		CacheDir:            "tmp/nacos/cache",
+		LogLevel:            "debug",
+	}
+	serverConfigs := []constant.ServerConfig{
+		{
+			IpAddr: Config.NacosConfig.Host,
+			Port:   Config.NacosConfig.Port,
+		},
+	}
+	configClient, _ := clients.CreateConfigClient(map[string]interface{}{
+		"serverConfigs": serverConfigs,
+		"clientConfig":  clientConfig,
 	})
+	content, _ := configClient.GetConfig(vo.ConfigParam{
+		DataId: Config.NacosConfig.DataId,
+		Group:  Config.NacosConfig.Group})
+	err = json.Unmarshal([]byte(content), Config)
+	if err != nil {
+		zap.S().Fatalf("读取 Nacos 配置失败 %s", zap.Error(err))
+	}
 }
